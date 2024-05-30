@@ -10,48 +10,38 @@ from scipy import integrate
 from scipy.interpolate import make_interp_spline
 import matplotlib.pyplot as plt
 
+#  Исходные данные
 
-def indata():
-    """Исходные данные"""
-
-    wind_region = "I"  # ветровой район
-    ter = 'B'  # тип местности
-    bld = 'здание'  # сооружение
-    a = 31.0  # размер здания в направлении расчетного ветра, [м]
-    d = 60.0  # размер здания в направлении перпендикулярном расчетному направлению ветра, [м]
-    dz = 0.15  # отметка 0.000, [м]
-    gf = 1.4  # коэффициент надёжности по нагрузке ветра
-    eb = 42000.0  # модуль упругости бетона, [МПа]
-    gb = 2.750  # плотность бетона, [Т/м3]
-    gfb = 1.1  # коэффициент надёжности по нагрузке бетона
-    ld = 9.0  # длина диафрагмы, [м]
-    si = 10.0  # пролёты, [м]
-    sc = 6.9  # ширина сбора нагрузок, [м]
-    nm = 4  # количество учитываемых форм колебаний
-    c = 1.3  # аэродинамический коэффициент
-    delta = 0.3  # логарифмический декремент
-    xyz = 'z0y'  # расчётная поверхность
-    return wind_region, ter, bld, a, d, dz, gf, eb, gb, gfb, ld, si, sc, nm, c, delta, xyz
-
-
-# загрузка данных
-g = const.g
+rdm = pd.read_csv('rdm.csv', delimiter=';')
 data = pd.read_csv('data.csv', delimiter=';')
+wind_region = data['wr'][0]  # ветровой район
+ter = data['ter'][0]  # тип местности
+bld = data['bld'][0]  # сооружение
+a = data['a'][0]  # размер здания в направлении расчетного ветра, [м]
+d = data['d'][0]  # размер здания в направлении перпендикулярном расчетному направлению ветра, [м]
+dz = data['dz'][0]  # отметка 0.000, [м]
+eb = data['eb'][0]  # модуль упругости бетона, [МПа]
+nm = data['nm'][0]  # количество учитываемых форм колебаний
+c = data['c'][0]  # аэродинамический коэффициент
+delta = data['delta'][0]  # логарифмический декремент
+xyz = data['xyz'][0]  # расчётная поверхность
+gf = 1.4  # коэффициент надёжности по нагрузке ветра
+g = const.g
 t11_2 = pd.read_csv('table11_2.csv', delimiter=';')
 t11_4 = pd.read_csv('table11_4.csv', delimiter=';')
 tksi = pd.read_csv('table_ksi.csv', delimiter=';')
 t11_6 = pd.read_csv('table11_6.csv', delimiter=';')
 index = ['Ia', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII']
 table_11_1 = pd.Series([0.17, 0.23, 0.3, 0.38, 0.48, 0.6, 0.73, 0.85], index=index)
-wind_region, ter, bld, a, d, dz, gf, eb, gb, gfb, ld, si, sc, nm, c, delta, xyz = indata()
 
 
 def level(n):
     """Отметки этажей:"""
+
     x = np.zeros(n)
     x0 = dz
     for i in range(0, n):
-        x[i] = x0 + data['hi'][i]
+        x[i] = x0 + rdm['hi'][i]
         x0 = x[i]
     return x
 
@@ -61,12 +51,13 @@ def mass(n):
 
     m = np.zeros((n, n))
     for i in range(0, n):
-        m[i, i] = data['Mp'][i]
+        m[i, i] = rdm['Mp'][i]
     return m
 
 
 def mi(x, xi, xj, s, ei):
     """Моменты от единичных сил"""
+
     if x <= xi:
         m0 = s * xi - s * x
     else:
@@ -81,6 +72,7 @@ def mi(x, xi, xj, s, ei):
 
 def m_i(x, xi, s):
     """Моменты от единичных сил"""
+
     if x <= xi:
         m = s * xi - s * x
     else:
@@ -90,6 +82,7 @@ def m_i(x, xi, s):
 
 def m_d(xi, ei, n):
     """Матрица податливости"""
+
     md = np.zeros((n, n))
     for i in range(0, n):
         for j in range(0, n):
@@ -106,6 +99,7 @@ def ww(md):
 
 def plotmode(xi, u):
     """График форм колебаний"""
+
     x0 = xi
     xnew = np.linspace(x0.min(), x0.max(), 200)
     for i in range(0, nm):
@@ -274,6 +268,7 @@ def tg_1(k, f, w0):
 
 def plot_xi_(ti, xi_):
     """График xi"""
+
     plt.plot(ti, xi_, label=r"$\xi$")
     plt.legend()
     plt.xlabel('$T_{g,1}$')
@@ -350,6 +345,8 @@ def w_g(f, fl, wm, zet, xi, v):
 
 
 def plot_rdm(x, n):
+    """Рисунок RDM"""
+
     img = plt.imread('rdm.png')
     fig, ax = plt.subplots()
     ax.imshow(img, extent=[0, x[n] / 1.5, 0, x[n]])
@@ -363,10 +360,10 @@ def calc():
 
     print('Расчёт ветровой нагрузки по СП 20.13330.2016')  # Press Ctrl+F8 to toggle the breakpoint.
     w0 = table_11_1.loc[wind_region]  # нормативное значение ветрового давления
-    n = data.shape[0]  # количество этажей
+    n = rdm.shape[0]  # количество этажей
     xi = np.hstack((0.0, level(n)))
     mm = mass(n)
-    ei = eb * data['It'] * 1000
+    ei = eb * rdm['It'] * 1000
     md = m_d(xi, ei, n)
     dd = md @ mm
     md, u = np.linalg.eig(dd)
