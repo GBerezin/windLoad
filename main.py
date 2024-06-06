@@ -90,10 +90,10 @@ def m_d(xi, ei, n):
     return md
 
 
-def ww(md):
+def ww(mv):
     """Круговая частота"""
 
-    w = math.sqrt(1 / md)
+    w = math.sqrt(1 / mv)
     return w
 
 
@@ -366,9 +366,9 @@ def calc():
     ei = eb * rdm['It'] * 1000
     md = m_d(xi, ei, n)
     dd = md @ mm
-    md, u = np.linalg.eig(dd)
+    mv, u = np.linalg.eig(dd)
     vw = np.vectorize(ww)
-    w = vw(np.real(np.real(md)[:nm]))
+    w = vw(np.real(np.real(mv)[:nm]))
     print('Круговая частота, [рад/с]:')
     print(w[:4])
     t = 2 * math.pi / w
