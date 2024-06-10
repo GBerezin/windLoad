@@ -412,9 +412,6 @@ def calc():
     v = (v1 + (v2 - v1) / (chi2 - chi1) * (chi - chi1))[d]  # коэффициент корреляции
     print('Коэффициент корреляции v=', np.round(v, 3))
     wg = w_g(f, flim, wm, zeta_i, xi_[tg1].to_numpy(), v)
-    if f[1] >= flim:
-        plot_w(wg, 'Норм. пульсационная составляющая основной ветровой нагрузки ', 'g')
-        plot_w(wm + wg, 'Нормативное значение основной ветровой нагрузки ', '')
     return w0, n, xi, u, ze_i, k, wm, z_i, zeta_i, table_xi, ti, xi_, fl, f, flim, wg
 
 
