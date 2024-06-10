@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Black">
+<<<<<<< HEAD
     <option name="sdkName" value="C:\Users\georg\miniconda3" />
+=======
+    <option name="sdkName" value="$USER_HOME$/miniconda3" />
+>>>>>>> 490e21a0685418dbbbad82dd2635be5d7bcaf204
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="C:\Users\georg\miniconda3" project-jdk-type="Python SDK" />
 </project>
